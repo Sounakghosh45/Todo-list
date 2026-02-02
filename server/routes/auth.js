@@ -9,7 +9,7 @@ const User = require('../models/User');
 // @access  Public
 router.post('/register', async (req, res) => {
     const { username, password } = req.body;
-    console.log('Register request:', { username, password }); // DEBUG LOG
+    console.log('Register request for:', username);
 
     try {
         let user = await User.findOne({ username });
@@ -38,13 +38,19 @@ router.post('/register', async (req, res) => {
             process.env.JWT_SECRET || 'secret123',
             { expiresIn: '1h' },
             (err, token) => {
-                if (err) throw err;
+                if (err) {
+                    console.error('JWT Signing Error:', err);
+                    return res.status(500).json({ message: 'Error generating token' });
+                }
                 res.json({ token });
             }
         );
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server error');
+        console.error('Registration Error:', err);
+        res.status(500).json({
+            message: 'Server error during registration',
+            error: err.message
+        });
     }
 });
 
@@ -53,6 +59,7 @@ router.post('/register', async (req, res) => {
 // @access  Public
 router.post('/login', async (req, res) => {
     const { username, password } = req.body;
+    console.log('Login request for:', username);
 
     try {
         let user = await User.findOne({ username });
@@ -76,13 +83,19 @@ router.post('/login', async (req, res) => {
             process.env.JWT_SECRET || 'secret123',
             { expiresIn: '1h' },
             (err, token) => {
-                if (err) throw err;
+                if (err) {
+                    console.error('JWT Signing Error:', err);
+                    return res.status(500).json({ message: 'Error generating token' });
+                }
                 res.json({ token });
             }
         );
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server error');
+        console.error('Login Error:', err);
+        res.status(500).json({
+            message: 'Server error during login',
+            error: err.message
+        });
     }
 });
 

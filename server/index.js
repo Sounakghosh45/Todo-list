@@ -23,7 +23,11 @@ if (!MONGO_URI) {
 console.log('Connecting to MongoDB...');
 
 // Middleware
-app.use(cors());
+app.use(cors({
+    origin: '*', // For now allow all to debug CORS
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 // Routes
@@ -32,17 +36,29 @@ const authRoutes = require('./routes/auth');
 app.use('/api/todos', todoRoutes);
 app.use('/api/auth', authRoutes);
 
-// Database Connection
-const connectDB = async () => {
+// Database Connection and Server Start
+const startServer = async () => {
     try {
+        console.log('Connecting to MongoDB...');
         await mongoose.connect(MONGO_URI);
-        console.log('MongoDB Connected');
+        console.log('✅ MongoDB Connected');
+
+        app.listen(PORT, () => {
+            console.log(`🚀 Server running on port ${PORT}`);
+        });
     } catch (err) {
-        console.error('MongoDB Connection Error:', err);
+        console.error('❌ MongoDB Connection Error:', err.message);
         process.exit(1);
     }
 };
 
-connectDB();
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error('💥 Global Error:', err.stack);
+    res.status(500).json({
+        message: 'Something went wrong on the server!',
+        error: process.env.NODE_ENV === 'production' ? {} : err.message
+    });
+});
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+startServer();

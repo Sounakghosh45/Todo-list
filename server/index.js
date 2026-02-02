@@ -8,6 +8,8 @@ console.log('Starting server...');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+app.get('/', (req, res) => res.send('Server is running... Visit /health for details.'));
+
 // 1. CORS Middleware (MUST BE FIRST)
 app.use(cors()); // Simplest possible CORS for debugging
 

@@ -7,8 +7,20 @@ const cors = require('cors');
 console.log('Starting server...');
 const app = express();
 const PORT = process.env.PORT || 5000;
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/mern-todo';
-console.log('MONGO_URI:', MONGO_URI);
+
+let MONGO_URI = process.env.MONGO_URI;
+
+if (!MONGO_URI) {
+    if (process.env.NODE_ENV === 'production') {
+        console.error("❌ FATAL: MONGO_URI environment variable is not set!");
+        console.error("Please add MONGO_URI to your Render Environment Variables.");
+        process.exit(1);
+    }
+    console.warn("⚠️  WARNING: MONGO_URI not found. Falling back to local database.");
+    MONGO_URI = 'mongodb://localhost:27017/mern-todo';
+}
+
+console.log('Connecting to MongoDB...');
 
 // Middleware
 app.use(cors());
